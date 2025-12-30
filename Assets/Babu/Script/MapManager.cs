@@ -1,4 +1,5 @@
 using Codice.Client.BaseCommands.Merge;
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -80,8 +81,7 @@ namespace Babu
         {
             mapWidth = MapInfo.width;
             mapHeight = MapInfo.height;
-            Debug.Log("mapWidth : " + mapWidth + ", mapHeight : "
-                + mapHeight);
+            Debug.Log("mapWidth : " + mapWidth + ", mapHeight : " + mapHeight);
             Color[] pixels = MapInfo.GetPixels();
 
             for (int i = 0; i < mapHeight; i++)
@@ -100,35 +100,35 @@ namespace Babu
                     else if (pixelColor == ColorBlock[(int)BlockName.Walkable])
                     {
                         Instantiate(Block[(int)BlockName.Walkable],
-                            new Vector3(blockScale * j, 0, blockScale * j),
+                            new Vector3(blockScale * j, 0, blockScale * i),
                             Quaternion.identity, Map);
                         data.blockName = BlockName.Walkable;
                     }
                     else if (pixelColor == ColorBlock[(int)BlockName.NotWalkable])
                     {
                         Instantiate(Block[(int)BlockName.NotWalkable],
-                            new Vector3(blockScale * j, 0, blockScale * j),
+                           new Vector3(blockScale * j, 0, blockScale * i),
                             Quaternion.identity, Map);
                         data.blockName = BlockName.NotWalkable;
                     }
                     else if (pixelColor == ColorBlock[(int)BlockName.Responese])
                     {
                         Instantiate(Block[(int)BlockName.Responese],
-                            new Vector3(blockScale * j, 0, blockScale * j),
+                            new Vector3(blockScale * j, 0, blockScale * i),
                             Quaternion.identity, Map);
                         data.blockName = BlockName.Responese;
                     }
                     else if (pixelColor == ColorBlock[(int)BlockName.BuildingLand])
                     {
                         Instantiate(Block[(int)BlockName.BuildingLand],
-                            new Vector3(blockScale * j, 0, blockScale * j),
+                            new Vector3(blockScale * j, 0, blockScale * i),
                             Quaternion.identity, Map);
                         data.blockName = BlockName.BuildingLand;
                     }
                     else if (pixelColor == ColorBlock[(int)BlockName.DefenseBuilding])
                     {
                         Instantiate(Block[(int)BlockName.DefenseBuilding],
-                            new Vector3(blockScale * j, 0, blockScale * j),
+                            new Vector3(blockScale * j, 0, blockScale * i),
                             Quaternion.identity, Map);
                         data.blockName = BlockName.DefenseBuilding;
                     }
@@ -137,13 +137,55 @@ namespace Babu
 
                 }
             }
-
-            void Start()
+        }
+        public bool isRoad(int x, int z, int size)
+        {
+            for (int i = 0; i < size; i++)
             {
-                Map = GameObject.Find("Map").transform;
-                GenerateMap();
+                for (int j = 0; j < size; j++)
+                {
+                    int posX = x + i;
+                    int posZ = z + j;
+                    if(posX >= mapWidth || posX <= 0 || posZ >= mapHeight || posZ <= 0)
+                    {
+                        return false;
+                    }
+                    MapData temp = GetMapData(posX, posZ);
+                    if (temp.blockName != BlockName.Walkable)
+                    {
+                        return false;
+                    }
+                }
             }
+            return true;
+        }
 
+        public MapData GetMapData(int x, int z)
+        {
+            return mapData.Find(data => data.x == x && data.z == z);
+        }
+
+        public void ChangeBuild(int x, int z, int size, BlockName blockName)
+        {
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    int posX = x + i;
+                    int posZ = z + j;
+                    GetMapData(posX, posZ).blockName = blockName;
+                }
+            }
+        }
+
+
+
+
+
+        void Start()
+        {
+            Map = GameObject.Find("Map").transform;
+            GenerateMap();
         }
     }
 }
